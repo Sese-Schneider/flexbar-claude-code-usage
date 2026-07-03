@@ -44,14 +44,14 @@ function userBgColor(key: Key): string | undefined {
   return bgColor;
 }
 
-function drawKey(serialNumber: string, key: Key) {
+async function drawKey(serialNumber: string, key: Key) {
   let image: string;
 
   if (lastUsage) {
     const metric: Metric = key.data?.metric || 'session';
     const snapshot = getMetricSnapshot(lastUsage, metric);
     image = snapshot
-      ? renderUsageKey(keyWidth(key), snapshot, {
+      ? await renderUsageKey(keyWidth(key), snapshot, {
           showResetTime: key.data?.showResetTime !== false,
           showClawd: key.data?.showClawd === true,
           bgColor: userBgColor(key),
@@ -76,10 +76,10 @@ function drawKey(serialNumber: string, key: Key) {
   }
 }
 
-function drawAll() {
+async function drawAll() {
   for (const [serialNumber, keys] of aliveKeys) {
     for (const key of keys) {
-      drawKey(serialNumber, key);
+      await drawKey(serialNumber, key);
     }
   }
 }
@@ -96,7 +96,7 @@ async function refresh() {
       lastUsage = null;
     }
   }
-  drawAll();
+  await drawAll();
 }
 
 function pollIntervalMs(): number {
@@ -120,7 +120,7 @@ plugin.on('plugin.alive', async payload => {
 
   ensurePolling();
   if (lastUsage) {
-    drawAll();
+    await drawAll();
   } else {
     await refresh();
   }

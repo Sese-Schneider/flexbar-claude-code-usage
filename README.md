@@ -4,9 +4,9 @@ Display your [Claude Code](https://claude.com/claude-code) usage limits live on 
 
 Each key shows one usage limit as a meter: the current percentage, a progress bar that shifts from green through orange (75%) to red (100%) as usage increases, the time until the limit resets, and optionally Clawd, the Claude Code crab.
 
-![Session meter](docs/media/render-v3-session.png)
-![Weekly meter](docs/media/render-v3-weekly-clawd.png)
-![Per-model meter](docs/media/render-v3-model-full.png)
+![Session meter](docs/media/render-v4-session.png)
+![Weekly meter](docs/media/render-v4-weekly-clawd.png)
+![Per-model meter](docs/media/render-v4-model-full.png)
 
 ## Features
 
