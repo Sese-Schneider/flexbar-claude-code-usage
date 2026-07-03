@@ -41,11 +41,10 @@ function drawKey(serialNumber: string, key: Key) {
     const metric: Metric = key.data?.metric || 'session';
     const snapshot = getMetricSnapshot(lastUsage, metric);
     image = snapshot
-      ? renderUsageKey(
-          keyWidth(key),
-          snapshot,
-          key.data?.showResetTime !== false
-        )
+      ? renderUsageKey(keyWidth(key), snapshot, {
+          showResetTime: key.data?.showResetTime !== false,
+          showRobot: key.data?.showRobot === true,
+        })
       : renderMessageKey(
           keyWidth(key),
           'Claude Code',

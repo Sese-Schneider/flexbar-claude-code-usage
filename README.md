@@ -2,11 +2,11 @@
 
 Display your [Claude Code](https://claude.com/claude-code) usage limits live on your [Flexbar](https://eniacelec.com/products/flexbar) — like a [clawdmeter](https://github.com/HermannBjorgvin/Clawdmeter), but on the macro bar you already own.
 
-Each key shows one usage limit as a meter: the current percentage, a severity-colored progress bar (green / orange / red), and the time until the limit resets.
+Each key shows one usage limit as a meter: the current percentage, a progress bar that shifts from green through orange (75%) to red (100%) as usage increases, the time until the limit resets, and an optional Claude robot.
 
-![Session meter](docs/media/render-session-normal.png)
-![Weekly meter](docs/media/render-week-warning.png)
-![Per-model meter](docs/media/render-model-critical.png)
+![Session meter](docs/media/render-v2-session.png)
+![Weekly meter](docs/media/render-v2-weekly-robot.png)
+![Per-model meter](docs/media/render-v2-model-full.png)
 
 ## Features
 
@@ -44,6 +44,7 @@ Install from [Flexgate](https://flexgate.enilinx.com/), or download the `.flexpl
 | --- | --- | --- |
 | Usage limit | Session | Session (5 h), Weekly (all models), or Weekly (per model) |
 | Show time until reset | on | Show the countdown until the limit resets |
+| Show Claude robot | off | Show the Claude robot mascot next to the meter |
 
 ## Development
 

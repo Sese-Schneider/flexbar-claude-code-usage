@@ -2,29 +2,13 @@ import { Metric, UsageData, UsageLimit } from './types';
 
 export type MetricSnapshot = {
   percent: number;
-  severity: 'normal' | 'warning' | 'critical';
   resetsAt: string | null;
   label: string;
 };
 
-function severityFromPercent(percent: number): MetricSnapshot['severity'] {
-  if (percent >= 90) return 'critical';
-  if (percent >= 70) return 'warning';
-  return 'normal';
-}
-
-function normalizeSeverity(limit: UsageLimit): MetricSnapshot['severity'] {
-  if (limit.severity === 'warning' || limit.severity === 'critical') {
-    return limit.severity;
-  }
-  if (limit.severity === 'normal') return 'normal';
-  return severityFromPercent(limit.percent);
-}
-
 function fromLimit(limit: UsageLimit, label: string): MetricSnapshot {
   return {
     percent: Math.max(0, Math.min(100, Math.round(limit.percent))),
-    severity: normalizeSeverity(limit),
     resetsAt: limit.resets_at,
     label,
   };
@@ -47,7 +31,6 @@ export function getMetricSnapshot(
     if (usage.five_hour) {
       return {
         percent: Math.round(usage.five_hour.utilization),
-        severity: severityFromPercent(usage.five_hour.utilization),
         resetsAt: usage.five_hour.resets_at,
         label: 'SESSION',
       };
@@ -57,13 +40,12 @@ export function getMetricSnapshot(
 
   if (metric === 'weekly') {
     const limit = limits.find(l => l.kind === 'weekly_all');
-    if (limit) return fromLimit(limit, 'WEEK');
+    if (limit) return fromLimit(limit, 'WEEKLY');
     if (usage.seven_day) {
       return {
         percent: Math.round(usage.seven_day.utilization),
-        severity: severityFromPercent(usage.seven_day.utilization),
         resetsAt: usage.seven_day.resets_at,
-        label: 'WEEK',
+        label: 'WEEKLY',
       };
     }
     return null;
@@ -79,7 +61,6 @@ export function getMetricSnapshot(
   if (window) {
     return {
       percent: Math.round(window.utilization),
-      severity: severityFromPercent(window.utilization),
       resetsAt: window.resets_at,
       label: usage.seven_day_opus ? 'OPUS' : 'SONNET',
     };
