@@ -15,6 +15,8 @@ Each key shows one usage limit as a meter: the current percentage, a progress ba
 - **Per-model weekly meter** — the model-scoped weekly limit (e.g. Opus)
 - Tap a key to refresh immediately
 - No API key needed — reads your existing Claude Code login
+- Respects a custom key background color set in FlexDesigner
+- Optional Clawd mascot, using the official pixel-art artwork
 
 ## How it works
 
@@ -45,6 +47,8 @@ Install from [Flexgate](https://flexgate.enilinx.com/), or download the `.flexpl
 | Usage limit | Session | Session (5 h), Weekly (all models), or Weekly (per model) |
 | Show time until reset | on | Show the countdown until the limit resets |
 | Show Clawd | off | Show Clawd, the Claude Code crab, next to the meter |
+
+The countdown sits next to the percentage; on narrow keys with Clawd enabled it moves below the progress bar. A custom background color set in the key's style editor is used as the meter background.
 
 ## Development
 
