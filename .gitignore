@@ -1,0 +1,8 @@
+node_modules
+logs
+.vscode
+.env
+yarn.lock
+dev.sese.flexbar_claude_code_usage.plugin/backend
+dev.sese.flexbar_claude_code_usage.plugin/config.json
+*.flexplugin

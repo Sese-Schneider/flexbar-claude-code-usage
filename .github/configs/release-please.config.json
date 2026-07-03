@@ -1,0 +1,16 @@
+{
+    "packages": {
+        ".": {
+            "release-type": "node",
+            "bump-minor-pre-major": true,
+            "pull-request-title-pattern": "chore: Release ${version}",
+            "extra-files": [
+                {
+                    "type": "json",
+                    "path": "dev.sese.flexbar_claude_code_usage.plugin/manifest.json",
+                    "jsonpath": "$.version"
+                }
+            ]
+        }
+    }
+}

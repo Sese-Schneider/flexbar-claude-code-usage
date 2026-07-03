@@ -1,0 +1,82 @@
+{
+    "name": "Claude Code Usage",
+    "uuid": "dev.sese.flexbar_claude_code_usage",
+    "version": "0.1.0",
+    "author": "Sese-Schneider",
+    "entry": "backend/plugin.cjs",
+    "description": "Display your Claude Code usage limits on your Flexbar",
+    "repo": "https://github.com/Sese-Schneider/flexbar-claude-code-usage",
+    "sdk": {
+        "version": "1.0.0"
+    },
+    "software": {
+        "minimumVersion": "1.0.0"
+    },
+    "os": [
+        {
+            "platform": "mac",
+            "minimumVersion": "10.15"
+        },
+        {
+            "platform": "windows",
+            "minimumVersion": "10"
+        },
+        {
+            "platform": "linux",
+            "minimumVersion": "20.04"
+        }
+    ],
+    "device": [
+        {
+            "name": "flexbar",
+            "version": "1.0.0"
+        }
+    ],
+    "configPage": "global_config",
+    "keyLibrary": {
+        "title": "$PluginName",
+        "style": {
+            "icon": "mdi mdi-robot-outline"
+        },
+        "children": [
+            {
+                "title": "$Usage.Title",
+                "tip": "$Usage.Tip",
+                "cid": "dev.sese.flexbar_claude_code_usage.usage",
+                "config": {
+                    "keyType": "default",
+                    "clickable": true,
+                    "platform": [
+                        "windows",
+                        "mac",
+                        "linux"
+                    ]
+                },
+                "style": {
+                    "icon": "mdi mdi-gauge",
+                    "width": 240
+                },
+                "data": {
+                    "metric": "session",
+                    "showResetTime": true
+                }
+            }
+        ]
+    },
+    "local": {
+        "en": {
+            "PluginName": "Claude Code Usage",
+            "Usage": {
+                "Title": "Usage Meter",
+                "Tip": "Shows a Claude Code usage limit as a live meter",
+                "UI": {
+                    "metric": "Usage limit",
+                    "metricSession": "Session (5 hours)",
+                    "metricWeekly": "Weekly (all models)",
+                    "metricWeeklyModel": "Weekly (per model)",
+                    "showResetTime": "Show time until reset"
+                }
+            }
+        }
+    }
+}
