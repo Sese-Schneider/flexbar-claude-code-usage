@@ -25,8 +25,8 @@
             </v-col>
             <v-col cols="6">
                 <v-switch
-                    v-model="modelValue.data.showRobot"
-                    :label="$t('Usage.UI.showRobot')"
+                    v-model="modelValue.data.showClawd"
+                    :label="$t('Usage.UI.showClawd')"
                     hide-details
                     class="mx-2"
                 ></v-switch>
@@ -63,8 +63,8 @@ export default {
         if (this.modelValue.data.showResetTime === undefined) {
             this.modelValue.data.showResetTime = true;
         }
-        if (this.modelValue.data.showRobot === undefined) {
-            this.modelValue.data.showRobot = false;
+        if (this.modelValue.data.showClawd === undefined) {
+            this.modelValue.data.showClawd = false;
         }
     },
 };

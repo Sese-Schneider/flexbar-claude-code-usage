@@ -27,12 +27,12 @@ export function getMetricSnapshot(
 
   if (metric === 'session') {
     const limit = limits.find(l => l.kind === 'session');
-    if (limit) return fromLimit(limit, 'SESSION');
+    if (limit) return fromLimit(limit, 'Session');
     if (usage.five_hour) {
       return {
         percent: Math.round(usage.five_hour.utilization),
         resetsAt: usage.five_hour.resets_at,
-        label: 'SESSION',
+        label: 'Session',
       };
     }
     return null;
@@ -40,12 +40,12 @@ export function getMetricSnapshot(
 
   if (metric === 'weekly') {
     const limit = limits.find(l => l.kind === 'weekly_all');
-    if (limit) return fromLimit(limit, 'WEEKLY');
+    if (limit) return fromLimit(limit, 'Weekly');
     if (usage.seven_day) {
       return {
         percent: Math.round(usage.seven_day.utilization),
         resetsAt: usage.seven_day.resets_at,
-        label: 'WEEKLY',
+        label: 'Weekly',
       };
     }
     return null;
@@ -55,14 +55,14 @@ export function getMetricSnapshot(
   const scoped = limits.find(l => l.kind === 'weekly_scoped');
   if (scoped) {
     const model = scoped.scope?.model?.display_name;
-    return fromLimit(scoped, model ? model.toUpperCase() : 'MODEL');
+    return fromLimit(scoped, model ?? 'Model');
   }
   const window = usage.seven_day_opus ?? usage.seven_day_sonnet;
   if (window) {
     return {
       percent: Math.round(window.utilization),
       resetsAt: window.resets_at,
-      label: usage.seven_day_opus ? 'OPUS' : 'SONNET',
+      label: usage.seven_day_opus ? 'Opus' : 'Sonnet',
     };
   }
   return null;

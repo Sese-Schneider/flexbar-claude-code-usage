@@ -8,11 +8,10 @@ const COLORS = {
   background: '#1c1917',
   label: '#a8a29e',
   text: '#fafaf9',
-  subtext: '#78716c',
   barTrack: '#3f3b38',
   chipBg: '#2e2a27',
   claude: '#d97757',
-  eye: '#1c1917',
+  dark: '#1c1917',
 };
 
 // Bar color stops: green at 0%, orange at 75%, red at 100%
@@ -23,6 +22,7 @@ const COLOR_STOPS: [number, [number, number, number]][] = [
 ];
 
 const FONT = 'Arial, "Segoe UI", "Helvetica Neue", sans-serif';
+const DEG = Math.PI / 180;
 
 /** Interpolates the bar color along the green -> orange -> red gradient. */
 export function percentToColor(percent: number): string {
@@ -41,81 +41,115 @@ export function percentToColor(percent: number): string {
   return '#d9534f';
 }
 
-/** Draws a small Claude robot mascot into the given square area. */
-export function drawRobot(ctx: SKRSContext2D, x: number, y: number, size: number) {
+/** Draws Clawd, the Claude Code crab, into the given square area. */
+export function drawClawd(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  size: number
+) {
   const s = size / 40; // designed on a 40x40 grid
-
-  // antenna
-  ctx.strokeStyle = COLORS.claude;
-  ctx.lineWidth = 2 * s;
-  ctx.beginPath();
-  ctx.moveTo(x + 20 * s, y + 9 * s);
-  ctx.lineTo(x + 20 * s, y + 4 * s);
-  ctx.stroke();
   ctx.fillStyle = COLORS.claude;
+  ctx.strokeStyle = COLORS.claude;
+  ctx.lineCap = 'round';
+
+  // legs, three per side
+  ctx.lineWidth = 2 * s;
+  for (const [x1, y1, x2, y2] of [
+    [12, 27, 6, 30],
+    [13, 30, 8, 35],
+    [16, 32, 13, 37],
+    [28, 27, 34, 30],
+    [27, 30, 32, 35],
+    [24, 32, 27, 37],
+  ]) {
+    ctx.beginPath();
+    ctx.moveTo(x + x1 * s, y + y1 * s);
+    ctx.lineTo(x + x2 * s, y + y2 * s);
+    ctx.stroke();
+  }
+
+  // arms up to the claws
+  ctx.lineWidth = 2.5 * s;
   ctx.beginPath();
-  ctx.arc(x + 20 * s, y + 3.5 * s, 2.5 * s, 0, Math.PI * 2);
+  ctx.moveTo(x + 13 * s, y + 20 * s);
+  ctx.lineTo(x + 9 * s, y + 15 * s);
+  ctx.moveTo(x + 27 * s, y + 20 * s);
+  ctx.lineTo(x + 31 * s, y + 15 * s);
+  ctx.stroke();
+
+  // claws: pincer circles with an open wedge as the mouth
+  ctx.beginPath();
+  ctx.moveTo(x + 8 * s, y + 11 * s);
+  ctx.arc(x + 8 * s, y + 11 * s, 6 * s, -50 * DEG, -130 * DEG);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + 32 * s, y + 11 * s);
+  ctx.arc(x + 32 * s, y + 11 * s, 6 * s, -50 * DEG, -130 * DEG);
+  ctx.closePath();
   ctx.fill();
 
   // body
   ctx.beginPath();
-  ctx.roundRect(x + 6 * s, y + 9 * s, 28 * s, 22 * s, 6 * s);
+  ctx.ellipse(x + 20 * s, y + 24 * s, 11 * s, 9 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // eyes
-  ctx.fillStyle = COLORS.eye;
+  ctx.fillStyle = COLORS.dark;
   ctx.beginPath();
-  ctx.roundRect(x + 13 * s, y + 15 * s, 4 * s, 9 * s, 2 * s);
-  ctx.roundRect(x + 23 * s, y + 15 * s, 4 * s, 9 * s, 2 * s);
-  ctx.fill();
-
-  // feet
-  ctx.fillStyle = COLORS.claude;
-  ctx.beginPath();
-  ctx.roundRect(x + 10 * s, y + 32 * s, 7 * s, 5 * s, 2.5 * s);
-  ctx.roundRect(x + 23 * s, y + 32 * s, 7 * s, 5 * s, 2.5 * s);
+  ctx.roundRect(x + 15 * s, y + 19 * s, 3.2 * s, 8 * s, 1.6 * s);
+  ctx.roundRect(x + 21.8 * s, y + 19 * s, 3.2 * s, 8 * s, 1.6 * s);
   ctx.fill();
 }
 
-/** Renders the Claude robot as a standalone icon (transparent background). */
-export function renderRobotIcon(size: number): Buffer {
+/** Renders Clawd as a standalone icon (transparent background). */
+export function renderClawdIcon(size: number): Buffer {
   const canvas = createCanvas(size, size);
   const ctx = canvas.getContext('2d');
-  drawRobot(ctx, 0, 0, size);
+  drawClawd(ctx, 0, 0, size);
   return canvas.toBuffer('image/png');
 }
 
-function drawChip(ctx: SKRSContext2D, rightX: number, y: number, label: string) {
-  ctx.font = `bold 10px ${FONT}`;
+/** Draws the tag chip right-aligned at rightX; returns its left edge. */
+function drawChip(
+  ctx: SKRSContext2D,
+  rightX: number,
+  y: number,
+  label: string
+): number {
+  ctx.font = `bold 11px ${FONT}`;
   const textWidth = ctx.measureText(label).width;
-  const padX = 6;
-  const height = 16;
+  const padX = 8;
+  const height = 20;
   const width = textWidth + padX * 2;
   const x = rightX - width;
 
   ctx.fillStyle = COLORS.chipBg;
   ctx.beginPath();
-  ctx.roundRect(x, y, width, height, 4);
+  ctx.roundRect(x, y, width, height, 5);
   ctx.fill();
   ctx.strokeStyle = COLORS.barTrack;
   ctx.lineWidth = 1;
   ctx.stroke();
 
   ctx.fillStyle = COLORS.label;
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(label, x + padX, y + height / 2 + 1);
+  ctx.fillText(label, x + width / 2, y + height / 2 + 1);
+  return x;
 }
 
 export type RenderOptions = {
   showResetTime: boolean;
-  showRobot: boolean;
+  showClawd: boolean;
+  bgColor?: string;
 };
 
 /**
- * Renders a usage meter key face, clawdmeter style: optional robot mascot on
- * the left, a prominent percentage above the progress bar, the reset
- * countdown below it, and a tag chip naming the limit in the top right.
+ * Renders a usage meter key face, clawdmeter style: optional Clawd mascot on
+ * the left, a prominent percentage with the reset countdown next to it, a tag
+ * chip naming the limit in the top right, and the progress bar underneath.
  */
 export function renderUsageKey(
   width: number,
@@ -125,31 +159,48 @@ export function renderUsageKey(
   const canvas = createCanvas(width, KEY_HEIGHT);
   const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = COLORS.background;
+  ctx.fillStyle = options.bgColor || COLORS.background;
   ctx.fillRect(0, 0, width, KEY_HEIGHT);
 
-  const padding = 10;
+  const padding = 12;
   let contentX = padding;
 
-  if (options.showRobot) {
-    const robotSize = 40;
-    drawRobot(ctx, padding - 2, (KEY_HEIGHT - robotSize) / 2, robotSize);
-    contentX = padding + robotSize + 6;
+  if (options.showClawd) {
+    const clawdSize = 40;
+    drawClawd(ctx, padding - 4, (KEY_HEIGHT - clawdSize) / 2, clawdSize);
+    contentX = padding + clawdSize + 4;
   }
 
+  // tag chip, top right
+  const chipX = drawChip(ctx, width - padding, 8, snapshot.label);
+
   // percentage, prominent
+  const textBaseline = 28;
   ctx.fillStyle = COLORS.text;
   ctx.font = `bold 26px ${FONT}`;
   ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillText(`${snapshot.percent}%`, contentX, 3);
+  ctx.textBaseline = 'alphabetic';
+  const percentText = `${snapshot.percent}%`;
+  ctx.fillText(percentText, contentX, textBaseline);
+  const percentWidth = ctx.measureText(percentText).width;
 
-  // tag chip, top right
-  drawChip(ctx, width - padding, 6, snapshot.label);
+  // reset countdown, right of the percentage
+  if (options.showResetTime) {
+    const reset = formatTimeUntilReset(snapshot.resetsAt);
+    if (reset) {
+      const resetX = contentX + percentWidth + 10;
+      const maxWidth = chipX - resetX - 8;
+      if (maxWidth > 20) {
+        ctx.fillStyle = COLORS.label;
+        ctx.font = `12px ${FONT}`;
+        ctx.fillText(`Resets ${reset}`, resetX, textBaseline, maxWidth);
+      }
+    }
+  }
 
   // progress bar
-  const barHeight = 7;
-  const barY = 33;
+  const barHeight = 8;
+  const barY = 40;
   const barWidth = width - padding - contentX;
   ctx.fillStyle = COLORS.barTrack;
   ctx.beginPath();
@@ -161,18 +212,6 @@ export function renderUsageKey(
   ctx.beginPath();
   ctx.roundRect(contentX, barY, fillWidth, barHeight, barHeight / 2);
   ctx.fill();
-
-  // reset countdown, below the bar
-  if (options.showResetTime) {
-    const reset = formatTimeUntilReset(snapshot.resetsAt);
-    if (reset) {
-      ctx.fillStyle = COLORS.subtext;
-      ctx.font = `11px ${FONT}`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(`Resets ${reset}`, contentX, 46);
-    }
-  }
 
   return canvas.toDataURL('image/png');
 }

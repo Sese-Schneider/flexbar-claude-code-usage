@@ -34,6 +34,16 @@ function keyWidth(key: Key): number {
   return key.width || key.style?.width || 240;
 }
 
+// FlexDesigner default background colors, which we replace with our own theme
+const DEFAULT_BG_COLORS = ['#000000', '#040404', '#424242', '#4b4b4b'];
+
+function userBgColor(key: Key): string | undefined {
+  const bgColor = key.style?.bgColor;
+  if (typeof bgColor !== 'string' || !bgColor) return undefined;
+  if (DEFAULT_BG_COLORS.includes(bgColor.toLowerCase())) return undefined;
+  return bgColor;
+}
+
 function drawKey(serialNumber: string, key: Key) {
   let image: string;
 
@@ -43,7 +53,8 @@ function drawKey(serialNumber: string, key: Key) {
     image = snapshot
       ? renderUsageKey(keyWidth(key), snapshot, {
           showResetTime: key.data?.showResetTime !== false,
-          showRobot: key.data?.showRobot === true,
+          showClawd: key.data?.showClawd === true,
+          bgColor: userBgColor(key),
         })
       : renderMessageKey(
           keyWidth(key),
