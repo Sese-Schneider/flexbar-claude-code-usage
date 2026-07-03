@@ -12,8 +12,35 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           config-file: .github/configs/release-please.config.json
           manifest-file: .github/configs/release-please.manifest.json
+
+  # Tags created by release-please use GITHUB_TOKEN and therefore do not
+  # trigger the tag-push release workflow, so the asset is built and
+  # uploaded here whenever a release was just created.
+  upload-asset:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm run plugin:pack
+      - run: gh release upload "${{ needs.release-please.outputs.tag_name }}" dev.sese.flexbar_claude_code_usage.flexplugin --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
