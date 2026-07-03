@@ -4,6 +4,10 @@ Display your [Claude Code](https://claude.com/claude-code) usage limits live on 
 
 Each key shows one usage limit as a meter: the current percentage, a severity-colored progress bar (green / orange / red), and the time until the limit resets.
 
+![Session meter](docs/media/render-session-normal.png)
+![Weekly meter](docs/media/render-week-warning.png)
+![Per-model meter](docs/media/render-model-critical.png)
+
 ## Features
 
 - **Session meter** — your 5-hour rolling usage window
