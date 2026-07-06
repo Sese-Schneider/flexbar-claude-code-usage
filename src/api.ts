@@ -15,7 +15,9 @@ export class UsageError extends Error {
   constructor(
     message: string,
     public readonly code:
-      'no-credentials' | 'unauthorized' | 'rate-limited' | 'http' | 'network'
+      'no-credentials' | 'unauthorized' | 'rate-limited' | 'http' | 'network',
+    /** Seconds until the rate limit lifts, from the Retry-After header. */
+    public readonly retryAfterSeconds?: number
   ) {
     super(message);
   }
@@ -46,7 +48,12 @@ export async function fetchUsage(credentialsPath?: string): Promise<UsageData> {
     );
   }
   if (response.status === 429) {
-    throw new UsageError('Rate limited by the usage endpoint.', 'rate-limited');
+    const retryAfter = Number(response.headers.get('retry-after'));
+    throw new UsageError(
+      'Rate limited by the usage endpoint.',
+      'rate-limited',
+      Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined
+    );
   }
   if (!response.ok) {
     throw new UsageError(

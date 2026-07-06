@@ -22,6 +22,8 @@ Each key shows one usage limit as a meter: the current percentage, a progress ba
 
 The plugin reads the OAuth token that Claude Code stores on your machine (`~/.claude/.credentials.json`, or the Keychain on macOS) and polls the same usage endpoint that Claude Code's own `/usage` command uses. Usage polling costs no tokens and nothing is sent anywhere except to `api.anthropic.com`.
 
+One usage request serves all keys, at most one request every 30 seconds. If the endpoint rate-limits the plugin (HTTP 429), it honors the server's `Retry-After`: keys show a countdown until usage data returns, and no requests are made until then.
+
 Requirements:
 
 - [Claude Code](https://claude.com/claude-code) installed and logged in on the same computer

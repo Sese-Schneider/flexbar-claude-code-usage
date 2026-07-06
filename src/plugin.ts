@@ -3,11 +3,16 @@ import { logger, plugin } from '@eniac/flexdesigner';
 import { UsageError, fetchUsage } from './api';
 import { renderMessageKey, renderUsageKey } from './render';
 import { Config, Metric, UsageData } from './types';
-import { getMetricSnapshot } from './usage';
+import { formatTimeUntilReset, getMetricSnapshot } from './usage';
 
 const USAGE_CID = 'dev.sese.flexbar_claude_code_usage.usage';
 const DEFAULT_POLL_INTERVAL = 180;
 const MIN_POLL_INTERVAL = 60;
+// Minimum gap between any two usage requests, so key presses and page
+// switches cannot burst against the rate-limited endpoint
+const MIN_FETCH_GAP_MS = 30_000;
+// Fallback lockout when a 429 comes without a Retry-After header
+const DEFAULT_LOCKOUT_SECONDS = 300;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Key = any;
@@ -18,6 +23,10 @@ let config: Config | null = null;
 let lastUsage: UsageData | null = null;
 let lastError: string | null = null;
 let pollTimer: NodeJS.Timeout | null = null;
+let lockedUntil: number | null = null;
+let lockTicker: NodeJS.Timeout | null = null;
+let lastFetchAt = 0;
+let inFlight: Promise<void> | null = null;
 
 async function getConfigCached(): Promise<Config> {
   if (config) return config;
@@ -47,7 +56,14 @@ function userBgColor(key: Key): string | undefined {
 async function drawKey(serialNumber: string, key: Key) {
   let image: string;
 
-  if (lastUsage) {
+  if (lockedUntil && Date.now() < lockedUntil) {
+    const lift = formatTimeUntilReset(new Date(lockedUntil).toISOString());
+    image = renderMessageKey(
+      keyWidth(key),
+      'Rate limited',
+      `Usage data returns in ${lift}`
+    );
+  } else if (lastUsage) {
     const metric: Metric = key.data?.metric || 'session';
     const snapshot = getMetricSnapshot(lastUsage, metric);
     image = snapshot
@@ -84,15 +100,70 @@ async function drawAll() {
   }
 }
 
-async function refresh() {
+function clearLock() {
+  lockedUntil = null;
+  if (lockTicker) {
+    clearInterval(lockTicker);
+    lockTicker = null;
+  }
+}
+
+/**
+ * Enters lockout for the given duration: no requests are made until it
+ * expires (the window counts down server-side regardless of further
+ * requests), and a ticker keeps the countdown on the keys fresh.
+ */
+function setLock(seconds: number) {
+  lockedUntil = Date.now() + seconds * 1000;
+  logger?.warn(`Usage endpoint rate limited, backing off for ${seconds}s`);
+  if (lockTicker) clearInterval(lockTicker);
+  lockTicker = setInterval(async () => {
+    if (lockedUntil && Date.now() >= lockedUntil) {
+      clearLock();
+      await refresh();
+    } else {
+      await drawAll();
+    }
+  }, 15_000);
+}
+
+function hasAliveKeys(): boolean {
+  for (const keys of aliveKeys.values()) {
+    if (keys.length > 0) return true;
+  }
+  return false;
+}
+
+function refresh(): Promise<void> {
+  if (!inFlight) {
+    inFlight = doRefresh().finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}
+
+async function doRefresh() {
+  const now = Date.now();
+  if (lockedUntil && now < lockedUntil) {
+    await drawAll();
+    return;
+  }
+  if (now - lastFetchAt < MIN_FETCH_GAP_MS) return;
+  if (!hasAliveKeys()) return;
+  lastFetchAt = now;
+
   const cfg = await getConfigCached();
   try {
     lastUsage = await fetchUsage(cfg.credentialsPath);
     lastError = null;
+    clearLock();
   } catch (error) {
     lastError = error instanceof UsageError ? error.message : `${error}`;
     logger?.error('Failed to fetch Claude usage:', error);
-    if (!(error instanceof UsageError && error.code === 'rate-limited')) {
+    if (error instanceof UsageError && error.code === 'rate-limited') {
+      setLock(error.retryAfterSeconds ?? DEFAULT_LOCKOUT_SECONDS);
+    } else {
       lastUsage = null;
     }
   }
@@ -141,6 +212,10 @@ plugin.on('ui.message', async payload => {
   logger?.info('Received message from UI:', payload.data);
 
   if (payload.data === 'test-connection') {
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const lift = formatTimeUntilReset(new Date(lockedUntil).toISOString());
+      return { success: false, error: `Rate limited, retry in ${lift}` };
+    }
     try {
       const usage = await fetchUsage(payload.config?.credentialsPath);
       const session = getMetricSnapshot(usage, 'session');
