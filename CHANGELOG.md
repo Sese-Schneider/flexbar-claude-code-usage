@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/Sese-Schneider/flexbar-claude-code-usage/compare/v0.2.0...v0.3.0) (2026-07-06)
+
+
+### Features
+
+* honor Retry-After with a lockout countdown on the keys ([313c104](https://github.com/Sese-Schneider/flexbar-claude-code-usage/commit/313c10463bc17a5954c852c58b237559078c2ff6))
+
+
+### Bug Fixes
+
+* actionable message when the stored Claude Code token is expired ([edee7d7](https://github.com/Sese-Schneider/flexbar-claude-code-usage/commit/edee7d7ceb705beae57f8c16c3c6e62cd24adbeb))
+
 ## [0.2.0](https://github.com/Sese-Schneider/flexbar-claude-code-usage/compare/v0.1.0...v0.2.0) (2026-07-03)
 
 
