@@ -43,7 +43,7 @@ export async function fetchUsage(credentialsPath?: string): Promise<UsageData> {
 
   if (response.status === 401) {
     throw new UsageError(
-      'Claude Code token expired. It refreshes automatically when Claude Code runs.',
+      'Claude Code token expired — run any claude command in a terminal to refresh it.',
       'unauthorized'
     );
   }
