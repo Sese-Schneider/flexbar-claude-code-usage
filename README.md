@@ -24,6 +24,8 @@ The plugin reads the OAuth token that Claude Code stores on your machine (`~/.cl
 
 One usage request serves all keys, at most one request every 30 seconds. If the endpoint rate-limits the plugin (HTTP 429), it honors the server's `Retry-After`: keys show a countdown until usage data returns, and no requests are made until then.
 
+When the stored token expires, the plugin refreshes it the same way Claude Code does (via the stored refresh token) and writes the new token pair back to the credential store — so the meters keep working even if you only use the Claude desktop app and never run the CLI. If the refresh token itself has been revoked, keys ask you to log in with Claude Code again.
+
 Requirements:
 
 - [Claude Code](https://claude.com/claude-code) installed and logged in on the same computer

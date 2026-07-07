@@ -1,3 +1,5 @@
+import { logger } from '@eniac/flexdesigner';
+
 import { getAccessToken } from './credentials';
 import { UsageData } from './types';
 
@@ -23,8 +25,20 @@ export class UsageError extends Error {
   }
 }
 
+async function requestUsage(token: string): Promise<Response> {
+  try {
+    return await fetch(USAGE_URL, {
+      headers: { ...HEADERS, Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    throw new UsageError(`Network error: ${error}`, 'network');
+  }
+}
+
 export async function fetchUsage(credentialsPath?: string): Promise<UsageData> {
-  const token = await getAccessToken(credentialsPath);
+  const token = await getAccessToken(credentialsPath, {
+    logger: logger ?? undefined,
+  });
   if (!token) {
     throw new UsageError(
       'No Claude Code credentials found. Log in with Claude Code first.',
@@ -32,18 +46,23 @@ export async function fetchUsage(credentialsPath?: string): Promise<UsageData> {
     );
   }
 
-  let response: Response;
-  try {
-    response = await fetch(USAGE_URL, {
-      headers: { ...HEADERS, Authorization: `Bearer ${token}` },
+  let response = await requestUsage(token);
+
+  // Expired/revoked token despite a plausible stored expiry: force one
+  // refresh through the stored refresh token and retry once
+  if (response.status === 401) {
+    const refreshed = await getAccessToken(credentialsPath, {
+      force: true,
+      logger: logger ?? undefined,
     });
-  } catch (error) {
-    throw new UsageError(`Network error: ${error}`, 'network');
+    if (refreshed && refreshed !== token) {
+      response = await requestUsage(refreshed);
+    }
   }
 
   if (response.status === 401) {
     throw new UsageError(
-      'Claude Code token expired — run any claude command in a terminal to refresh it.',
+      'Claude Code login expired — run any claude command in a terminal to log in again.',
       'unauthorized'
     );
   }
