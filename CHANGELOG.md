@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/Sese-Schneider/flexbar-claude-code-usage/compare/v0.3.0...v0.4.0) (2026-07-07)
+
+
+### Features
+
+* refresh the Claude Code OAuth token automatically ([27d4005](https://github.com/Sese-Schneider/flexbar-claude-code-usage/commit/27d4005a4880f390e373fe5186acbbeed0da9a5f))
+
+
+### Bug Fixes
+
+* fall through to the next OAuth endpoint on HTTP rejection ([76851fe](https://github.com/Sese-Schneider/flexbar-claude-code-usage/commit/76851fe461da3cb219c6ec8ec8e2e6ce2088c979))
+
 ## [0.3.0](https://github.com/Sese-Schneider/flexbar-claude-code-usage/compare/v0.2.0...v0.3.0) (2026-07-06)
 
 
