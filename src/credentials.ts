@@ -218,18 +218,19 @@ async function doRefresh(
         headers: { 'Content-Type': 'application/json' },
         body,
       });
-      break;
+      if (response.ok) break;
+      // A rejection may be endpoint-specific (e.g. one domain not serving
+      // this token's account class) — try the next endpoint. If the token
+      // was truly consumed/revoked (invalid_grant), the retry fails the
+      // same way, which is harmless.
+      logger?.warn(
+        `Token refresh via ${url} rejected with HTTP ${response.status}`
+      );
     } catch (error) {
       logger?.error(`Token refresh request to ${url} failed:`, error);
     }
   }
-  if (!response) return null;
-  if (!response.ok) {
-    // 400/401 invalid_grant is terminal: the refresh token was rotated away
-    // (e.g. by the CLI) or revoked; only a new login fixes it
-    logger?.warn(`Token refresh rejected with HTTP ${response.status}`);
-    return null;
-  }
+  if (!response?.ok) return null;
 
   const data = (await response.json()) as {
     access_token: string;
