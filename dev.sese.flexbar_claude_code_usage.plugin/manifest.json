@@ -1,7 +1,7 @@
 {
     "name": "Claude Code Usage",
     "uuid": "dev.sese.flexbar_claude_code_usage",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "author": "Sese-Schneider",
     "entry": "backend/plugin.cjs",
     "description": "Display your Claude Code usage limits on your Flexbar",
